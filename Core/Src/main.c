@@ -133,35 +133,36 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
-  uint8_t toggler = 0;
   while (1)
   {
 	  uint8_t dev_state = hUsbDeviceFS.dev_state;
-	  if (dev_state == USBD_STATE_CONFIGURED && ready) {
-		  ready = 0;
+	  if (dev_state == USBD_STATE_CONFIGURED) {
+		  HAL_GPIO_WritePin(ONBOARD_LED_GPIO_Port, ONBOARD_LED_Pin, GPIO_PIN_RESET);
 
-		  HAL_GPIO_WritePin(ONBOARD_LED_GPIO_Port, ONBOARD_LED_Pin, GPIO_PIN_SET);
+		  if (ready) {
+			  ready = 0;
 
-		  // Create a string to send to the host
-		  char adc_readings[64] = "";
-		  snprintf(
-			  adc_readings,
-			  sizeof(adc_readings),
-			  "%ld:%ld:%ld:%f:%f:%f\r\n",
-			  adc_value[0],
-			  adc_value[1],
-			  adc_value[2],
-			  adc_to_voltage(adc_value[0]),
-			  adc_to_voltage(adc_value[1]),
-			  adc_to_voltage(adc_value[2])
-		  );
+			  // Create a string to send to the host
+			  char adc_readings[64] = "";
+			  snprintf(
+				  adc_readings,
+				  sizeof(adc_readings),
+				  "%ld:%ld:%ld:%f:%f:%f\r\n",
+				  adc_value[0],
+				  adc_value[1],
+				  adc_value[2],
+				  adc_to_voltage(adc_value[0]),
+				  adc_to_voltage(adc_value[1]),
+				  adc_to_voltage(adc_value[2])
+			  );
 
-		  // Send reading over USB-CDC connection
-		  CDC_Transmit_FS((uint8_t*) adc_readings, strlen(adc_readings));
-
+			  // Send reading over USB-CDC connection
+			  CDC_Transmit_FS((uint8_t*) adc_readings, strlen(adc_readings));
+		  }
+	  } else {
 		  HAL_GPIO_WritePin(ONBOARD_LED_GPIO_Port, ONBOARD_LED_Pin, GPIO_PIN_SET);
 	  }
-	  HAL_GPIO_WritePin(ONBOARD_LED_GPIO_Port, ONBOARD_LED_Pin, GPIO_PIN_RESET);
+
 
     /* USER CODE END WHILE */
 
@@ -315,7 +316,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOA_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(ONBOARD_LED_GPIO_Port, ONBOARD_LED_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(ONBOARD_LED_GPIO_Port, ONBOARD_LED_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin : ONBOARD_LED_Pin */
   GPIO_InitStruct.Pin = ONBOARD_LED_Pin;
