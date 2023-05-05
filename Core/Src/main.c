@@ -132,7 +132,6 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  //printf("Starting");
 
   uint8_t toggler = 0;
   while (1)
@@ -140,36 +139,29 @@ int main(void)
 	  uint8_t dev_state = hUsbDeviceFS.dev_state;
 	  if (dev_state == USBD_STATE_CONFIGURED && ready) {
 		  ready = 0;
-		  // As we're using DMA, the variables will be populated for us in the background
+
+		  HAL_GPIO_WritePin(ONBOARD_LED_GPIO_Port, ONBOARD_LED_Pin, GPIO_PIN_SET);
 
 		  // Create a string to send to the host
-		  char adc_readings[32] = "";
+		  char adc_readings[64] = "";
 		  snprintf(
 			  adc_readings,
 			  sizeof(adc_readings),
-			  //"%ld:%ld:%ld:%f:%f:%f\r\n",
-			  "%ld:%ld:%ld\r\n",
+			  "%ld:%ld:%ld:%f:%f:%f\r\n",
 			  adc_value[0],
 			  adc_value[1],
-			  adc_value[2]//,
-//			  adc_to_voltage(adc_value[0]),
-//			  adc_to_voltage(adc_value[1]),
-//			  adc_to_voltage(adc_value[2])
+			  adc_value[2],
+			  adc_to_voltage(adc_value[0]),
+			  adc_to_voltage(adc_value[1]),
+			  adc_to_voltage(adc_value[2])
 		  );
 
 		  // Send reading over USB-CDC connection
 		  CDC_Transmit_FS((uint8_t*) adc_readings, strlen(adc_readings));
-		  //CDC_Transmit_FS((uint8_t*) "hello\r\n", 7U);
 
-		  toggler = !toggler;
-
-		  if (toggler) {
-			  HAL_GPIO_WritePin(ONBOARD_LED_GPIO_Port, ONBOARD_LED_Pin, GPIO_PIN_SET);
-		  } else {
-			  HAL_GPIO_WritePin(ONBOARD_LED_GPIO_Port, ONBOARD_LED_Pin, GPIO_PIN_RESET);
-		  }
-		  //HAL_Delay(100);
+		  HAL_GPIO_WritePin(ONBOARD_LED_GPIO_Port, ONBOARD_LED_Pin, GPIO_PIN_SET);
 	  }
+	  HAL_GPIO_WritePin(ONBOARD_LED_GPIO_Port, ONBOARD_LED_Pin, GPIO_PIN_RESET);
 
     /* USER CODE END WHILE */
 
